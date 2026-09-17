@@ -1,0 +1,50 @@
+// server/prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Master Produk Bazar
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  price       Float       // Harga jual (dibulatkan)
+  costPrice   Float?      // Harga modal / HPP (dibulatkan)
+  stock       Int         @default(100) // Stok barang di stand
+  imageUrl    String?     // Foto produk
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// Transaksi Penjualan Kasir Bazar
+model Order {
+  id            Int           @id @default(autoincrement())
+  orderNumber   String        @unique // Format: BZR-YYYYMMDD-XXXX
+  subtotal      Float?        // Total harga produk murni
+  adminFee      Float         @default(0) // Biaya admin Rp 500 per barang untuk produk <= 10.000
+  totalAmount   Float         // Total tagihan akhir (subtotal + adminFee)
+  paymentMethod String        // "CASH", "QRIS", "TRANSFER"
+  cashTendered  Float?        // Nominal uang yang diserahkan pembeli
+  changeAmount  Float?        // Kembalian pembeli
+  customerName  String?       // Nama pembeli (opsional)
+  notes         String?       // Catatan pesanan
+  items         OrderItem[]
+  createdAt     DateTime      @default(now())
+}
+
+// Detail Item dalam Satu Transaksi
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float   // Harga satuan saat transaksi
+  subtotal  Float   // quantity * price
+}

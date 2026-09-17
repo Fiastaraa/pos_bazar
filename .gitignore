@@ -1,0 +1,33 @@
+# Node Dependencies
+node_modules/
+*/node_modules/
+
+# Environment Variables (Secrets)
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Production Build Outputs
+dist/
+build/
+client/dist/
+*.tsbuildinfo
+
+# User Uploaded Files & Temporary
+uploads/*
+!uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs & System
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
