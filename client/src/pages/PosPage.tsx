@@ -35,9 +35,7 @@ export const PosPage: React.FC<PosPageProps> = ({ onCartChange }) => {
       setProducts(prodRes);
     } catch (err: any) {
       console.error(err);
-      setError(
-        'Belum terhubung ke server backend atau database. Pastikan backend aktif di port 5000.'
-      );
+      setError('Gagal memuat data menu. Silakan klik tombol segarkan.');
     } finally {
       setLoading(false);
     }

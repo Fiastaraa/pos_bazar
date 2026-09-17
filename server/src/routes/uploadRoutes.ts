@@ -1,31 +1,11 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
 
 const router = Router();
 
-// Pastikan folder uploads tersedia
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Konfigurasi penyimpanan disk multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const cleanName = path
-      .basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9]/g, '-')
-      .toLowerCase();
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `menu-${cleanName}-${uniqueSuffix}${ext}`);
-  },
-});
+// Gunakan memoryStorage agar kompatibel sempurna di serverless (Vercel) & lokal
+const storage = multer.memoryStorage();
 
 // Filter hanya file gambar
 const fileFilter = (
@@ -60,14 +40,14 @@ router.post('/', upload.single('image'), (req: Request, res: Response) => {
       });
     }
 
-    // Path yang dapat diakses oleh client frontend
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // Ubah ke Data URL Base64 yang aman disimpan di database dan tampil langsung di frontend
+    const base64Data = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
     return res.status(201).json({
       success: true,
       message: 'Foto menu berhasil diunggah',
-      url: fileUrl,
-      filename: req.file.filename,
+      url: base64Data,
+      filename: req.file.originalname,
     });
   } catch (error: any) {
     return res.status(500).json({
